@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EuGall Tactical Patek Philippe</title>
+    <style>
+        :root {
+            --tactical-green: #00FF00;
+            --tactical-background: #000000;
+            --tactical-accent: #b58863;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Stack clock and date */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--tactical-background);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* --- Clock Container --- */
+        #eugall-clock-container {
+            position: relative;
+            width: 85vw; 
+            height: 85vw; 
+            max-width: 450px;
+            max-height: 450px;
+            /* Replace 'clean_dial.png' with your actual image URL */
+            background-image: url('efgdial.png'); 
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.1); 
+            margin-bottom: 20px;
+        }
+
+        /* --- Tactical Date Display --- */
+        #tactical-date {
+            color: var(--tactical-green);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--tactical-green);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        /* --- Hands (Positioned via JS) --- */
+        .eugall-hand {
+            position: absolute;
+            background-color: var(--tactical-accent);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            transform-origin: bottom center;
+        }
+
+        .eugall-hour-hand { width: 2.2%; height: 25%; z-index: 10; }
+        .eugall-minute-hand { width: 1.4%; height: 40%; z-index: 11; }
+        .eugall-second-hand { 
+            width: 0.8%; height: 45%; 
+            background-color: #a04000; 
+            z-index: 12;
+            transition: transform 0.05s cubic-bezier(0.1, 2.7, 0.58, 1);
+        }
+
+        .eugall-center-cap {
+            position: absolute;
+            width: 4.5%; height: 4.5%;
+            background-color: var(--tactical-accent);
+            border-radius: 50%;
+            z-index: 13;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="eugall-clock-container">
+        <div class="eugall-hand eugall-hour-hand" id="eugall-hour"></div>
+        <div class="eugall-hand eugall-minute-hand" id="eugall-minute"></div>
+        <div class="eugall-hand eugall-second-hand" id="eugall-second"></div>
+        <div class="eugall-center-cap" id="eugall-hub"></div>
+    </div>
+
+    <div id="tactical-date">LOADING SECURE DATE...</div>
+
+    <script>
+        const clockContainer = document.getElementById('eugall-clock-container');
+        const hourHand = document.getElementById('eugall-hour');
+        const minuteHand = document.getElementById('eugall-minute');
+        const secondHand = document.getElementById('eugall-second');
+        const centerHub = document.getElementById('eugall-hub');
+        const dateDisplay = document.getElementById('tactical-date');
+
+        function updateDisplay() {
+            const rect = clockContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            [hourHand, minuteHand, secondHand].forEach(hand => {
+                hand.style.left = `${centerX}px`;
+                const handHeight = hand.offsetHeight;
+                hand.style.top = `${centerY - handHeight}px`;
+            });
+
+            centerHub.style.left = `${centerX - (centerHub.offsetWidth / 2)}px`;
+            centerHub.style.top = `${centerY - (centerHub.offsetHeight / 2)}px`;
+
+            const now = new Date();
+            
+            // Time logic
+            const s = now.getSeconds();
+            secondHand.style.transform = `translateX(-50%) rotate(${(s / 60) * 360}deg)`;
+            const m = now.getMinutes();
+            minuteHand.style.transform = `translateX(-50%) rotate(${((m / 60) * 360) + ((s / 60) * 6)}deg)`;
+            const h = now.getHours();
+            hourHand.style.transform = `translateX(-50%) rotate(${((h / 12) * 360) + ((m / 60) * 30)}deg)`;
+
+            // Date logic (e.g., MON 23 MAR 2026)
+            const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+            dateDisplay.textContent = now.toLocaleDateString('en-GB', options).replace(/,/g, '');
+        }
+
+        setInterval(updateDisplay, 1000);
+        updateDisplay();
+    </script>
+</body>
+</html>
